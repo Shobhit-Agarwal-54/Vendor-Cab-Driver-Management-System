@@ -1,0 +1,141 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+ 
+}
+// --- Enums ---
+enum UserRole {
+  SUPER_VENDOR
+  SUB_VENDOR
+  DRIVER
+}
+
+enum VehicleStatus {
+  ACTIVE
+  MAINTENANCE
+  NON_COMPLIANT
+  RETIRED
+}
+
+enum DocType {
+  DRIVING_LICENSE
+  REGISTRATION_CERTIFICATE
+  INSURANCE
+  POLLUTION_CERT
+  PERMIT
+}
+
+enum VerificationStatus {
+  PENDING
+  VERIFIED
+  REJECTED
+  EXPIRED
+}
+
+// --- Models ---
+
+model User {
+  id            Int       @id @default(autoincrement())
+  email         String    @unique
+  passwordHash  String
+  role          UserRole
+  isActive      Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  vendorProfile Vendor?
+  driverProfile Driver?
+
+  @@map("users")
+}
+
+model Vendor {
+  id      Int     @id @default(autoincrement())
+  userId  Int     @unique
+  user    User    @relation(fields: [userId], references: [id])
+  
+  // Hierarchy (Parent-Child)
+  parentId  Int?    
+  parent    Vendor? @relation("VendorHierarchy", fields: [parentId], references: [id])
+  children  Vendor[] @relation("VendorHierarchy")
+
+  level     Int     // 1=Super, 2=Regional, 3=City
+  region    String? 
+
+  // Permissions (Delegated by Super Vendor)
+  canOnboardDriver   Boolean @default(false)
+  canVerifyDocs      Boolean @default(false)
+  canProcessPayment  Boolean @default(false)
+  canEditVehicle     Boolean @default(false)
+
+  vehicles        Vehicle[]
+  driversManaged  Driver[]
+
+  @@index([parentId]) 
+  @@map("vendors")
+}
+
+model Vehicle {
+  id                 Int           @id @default(autoincrement())
+  ownerVendorId      Int
+  ownerVendor        Vendor        @relation(fields: [ownerVendorId], references: [id])
+  
+  registrationNumber String        @unique
+  model              String
+  capacity           Int
+  fuelType           String
+  status             VehicleStatus @default(ACTIVE)
+
+  assignedDriver     Driver?       
+  documents          Document[]
+
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
+
+  @@index([ownerVendorId])
+  @@map("vehicles")
+}
+
+model Driver {
+  id              Int      @id @default(autoincrement())
+  userId          Int      @unique
+  user            User     @relation(fields: [userId], references: [id])
+  
+  managedByVendorId Int
+  managedByVendor   Vendor @relation(fields: [managedByVendorId], references: [id])
+
+  currentVehicleId  Int?     @unique
+  currentVehicle    Vehicle? @relation(fields: [currentVehicleId], references: [id])
+
+  licenseNumber     String   @unique
+  documents         Document[]
+
+  @@map("drivers")
+}
+
+model Document {
+  id          Int                @id @default(autoincrement())
+  type        DocType
+  url         String             
+  expiryDate  DateTime
+  status      VerificationStatus @default(PENDING)
+  
+  driverId    Int?
+  driver      Driver?  @relation(fields: [driverId], references: [id])
+  
+  vehicleId   Int?
+  vehicle     Vehicle? @relation(fields: [vehicleId], references: [id])
+
+  uploadedAt  DateTime @default(now())
+
+  @@map("documents")
+}
