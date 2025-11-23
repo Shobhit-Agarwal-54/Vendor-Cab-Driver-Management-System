@@ -1,14 +1,18 @@
-import dotenv from 'dotenv';
 import express from 'express';
 import cors from "cors";
 import prisma from "./prisma/client.js";
-
-const app = express();
-dotenv.config(); 
+import {authRouter} from '../routes/authroutes.js';
+import {VendorRouter} from '../routes/vendor-routes.js';
+export const router= express.Router();
+import morgan from 'morgan';
+import bodyParser from 'body-parser';
+import fleetRouter from '../routes/fleetroutes.js';
+const app = express(); 
 
 app.use(cors()); 
-app.use(express.json()); 
-app.use(express.urlencoded({ extended: true }));
+    app.use(bodyParser.json());
+    app.use(bodyParser.urlencoded({extended:true}));
+app.use(morgan('combined')); 
 
 // Dummy Route to check API status
 app.get('/', (req, res) => {
@@ -17,6 +21,10 @@ app.get('/', (req, res) => {
     message: 'Vendor Management System API is running' 
   });
 });
+
+app.use('/api/auth',authRouter);
+app.use("/api/vendor",VendorRouter);
+app.use("/api/fleet",fleetRouter);
 
 // 4. Example Route: Get All Vendors (To test DB connection)
 app.get('/api/vendors', async (req, res) => {
