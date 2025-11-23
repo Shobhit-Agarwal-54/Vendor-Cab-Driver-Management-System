@@ -11,7 +11,7 @@ export const VendorRouter = express.Router();
 // This route works for both Super Vendors and Sub Vendors
 VendorRouter.post('/create-subvendor', verifyToken, async (req, res) => {
   try {
-    const { email, password, region, name } = req.body;
+    const { email, password, region } = req.body;
     
     // 1. Get current user's vendor profile
     const currentUser = await prisma.vendor.findUnique({ where: { userId: req.userId } });

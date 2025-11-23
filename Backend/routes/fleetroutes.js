@@ -49,7 +49,7 @@ fleetRouter.post('/onboard-driver', verifyToken, async (req, res) => {
   }
 });
 
-router.post('/add-vehicle', verifyToken, async (req, res) => {
+fleetRouter.post('/add-vehicle', verifyToken, async (req, res) => {
   const { registrationNumber, model, capacity, fuelType } = req.body;
 
   try {
@@ -104,7 +104,7 @@ router.post('/add-vehicle', verifyToken, async (req, res) => {
 
 
 
-router.post('/upload-doc', verifyToken, async (req, res) => {
+fleetRouter.post('/upload-doc', verifyToken, async (req, res) => {
   const { entityId, entityType, docType, docUrl, expiryDate } = req.body; // entityType: DRIVER | VEHICLE
 
   try {
@@ -153,7 +153,7 @@ router.post('/upload-doc', verifyToken, async (req, res) => {
 });
 
 // --- 2. Get Vehicles (Fleet) ---
-router.get('/vehicles', verifyToken, async (req, res) => {
+fleetRouter.get('/vehicles', verifyToken, async (req, res) => {
   try {
     const vendor = await prisma.vendor.findUnique({
       where: { userId: req.userId }
