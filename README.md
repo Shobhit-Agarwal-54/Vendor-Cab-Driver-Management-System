@@ -1,248 +1,164 @@
-🚖 MegaCabs: Vendor & Fleet Management System
+### 🚖 MegaCabs: Vendor & Fleet Management System
 
-A scalable, hierarchical ride-sharing management platform designed to handle N-level vendor delegation, fleet compliance, and robust driver onboarding.
+A scalable, hierarchical ride-sharing management platform designed to handle **N-level vendor delegation**, **fleet compliance**, and **robust driver onboarding**.
 
-📖 Project Overview
+---
 
-This project is a Vendor Cab and Driver Onboarding System that solves the complexity of managing large-scale fleet operations. Unlike traditional flat-structure systems, MegaCabs implements a Recursive N-Level Hierarchy (Super Vendor → Regional → City → Local), allowing for granular control and delegation of authority.
+### 📖 Project Overview
 
-🎯 Key Objectives Met
+MegaCabs is a Vendor Cab and Driver Onboarding System built to manage large-scale fleet operations.  
+Unlike traditional flat-structure systems, MegaCabs uses a **recursive N-Level hierarchy** (Super Vendor → Regional → City → Local), enabling granular authority distribution and management.
 
-Multi-Level Hierarchy: Infinite parent-child vendor relationships.
+---
 
-Secure Delegation: Super Vendors can grant specific permissions (e.g., "Can Onboard", "Can Verify") to sub-vendors.
+### 🎯 Key Objectives Met
 
-Strict Compliance: Automated checking of document expiry for drivers and vehicles.
+- **Multi-Level Hierarchy:** Infinite parent-child vendor relationships.  
+- **Secure Delegation:** Super Vendors can grant custom permissions (e.g., *Can Onboard*, *Can Verify*).  
+- **Strict Compliance:** Automatic document-expiry checks for drivers and vehicles.  
+- **Performance Optimization:** Recursive, optimized organizational tree retrieval.
 
-Performance Optimization: Optimized recursive queries for retrieving organizational trees.
+---
 
-🛠️ Tech Stack
+### 🛠️ Tech Stack
 
-Component
+| Component  | Technology                 | Why This Choice (Trade-off Analysis) |
+|-----------|-----------------------------|---------------------------------------|
+| Frontend  | React.js + Tailwind CSS     | Component reusability, fast UI dev.   |
+| Backend   | Node.js + Express           | Non-blocking I/O for large operations |
+| Database  | PostgreSQL (Neon DB)        | ACID, recursive queries, strong FK    |
+| ORM       | Prisma                      | Type-safe models, clean schema        |
+| Auth      | JWT + Bcrypt                | Stateless, fast, secure               |
 
-Technology
+---
 
-Reason for Choice (Trade-off Analysis)
+### 🏗️ System Architecture & Schema
 
-Frontend
+The system uses a **self-referencing Vendor model**, enabling infinite hierarchical tree structures without extra tables for levels.
 
-React.js + Tailwind CSS
+#### Database Schema (Self-Referencing Model Example)
 
-Component reusability for Dashboards; fast UI development.
-
-Backend
-
-Node.js + Express
-
-Non-blocking I/O for handling concurrent document uploads.
-
-Database
-
-PostgreSQL (Neon DB)
-
-ACID compliance required for hierarchy integrity and payments.
-
-ORM
-
-Prisma
-
-Provides OOPS structure (Models) and Type Safety.
-
-Auth
-
-JWT + Bcrypt
-
-Stateless, secure authentication protocol.
-
-🏗️ System Architecture & Schema
-
-The core of this system is the Self-Referencing Vendor Model. This design allows us to maintain an infinite hierarchy without creating separate tables for "Regional" or "City" vendors.
-
-The Database Schema (OOPS Implementation)
-
+```prisma
 model Vendor {
   id      Int     @id @default(autoincrement())
-  
+
   // The Hierarchy (Self-Referencing Relation)
-  parentId  Int?    
-  parent    Vendor? @relation("VendorHierarchy", fields: [parentId], references: [id])
+  parentId  Int?
+  parent    Vendor?  @relation("VendorHierarchy", fields: [parentId], references: [id])
   children  Vendor[] @relation("VendorHierarchy")
 
   // Permissions (Flattened for O(1) Access)
-  canOnboardDriver   Boolean @default(false)
-  canVerifyDocs      Boolean @default(false)
-  
+  canOnboardDriver  Boolean @default(false)
+  canVerifyDocs     Boolean @default(false)
+
   // Relationships (Encapsulation)
   vehicles        Vehicle[]
   driversManaged  Driver[]
 }
+```
+### 🧠 Design Decisions & Trade-offs
 
+#### SQL vs NoSQL  
+Chose **PostgreSQL** because recursive hierarchy queries (`WITH RECURSIVE`) and strict foreign key relationships ensure strong data integrity.
 
-🧠 Design Decisions & Trade-offs
+#### Flattened Permissions  
+Instead of storing permissions in a separate table, boolean flags are used directly inside the Vendor table.
 
-SQL vs NoSQL: We chose PostgreSQL over MongoDB.
+- **Benefit:** Reduces JOIN complexity  
+- **Performance:** From `O(N)` joins → `O(1)` direct permission checks  
 
-Why? The recursive nature of the hierarchy (WITH RECURSIVE queries) and the need for strict foreign key constraints (Drivers must belong to Vendors) made a Relational DB superior for data integrity.
+---
 
-Flattened Permissions: Instead of a separate Permissions table (Normalization), we added boolean flags to the Vendor table.
+### 🚀 Features & Modules
 
-Benefit: Reduces JOIN complexity during login, improving response time from $O(N)$ to $O(1)$.
+#### 1. Authentication & Security
+- JWT Implementation: Secure session management.
+- Role-Based Access Control (RBAC): Middleware (verifyToken, isSuperVendor) strictly guards routes.
+- Password Hashing: Bcrypt utilized for security.
 
-🚀 Features & Modules
+#### 2. Multi-Level Vendor Hierarchy
+- Visual Tree: Frontend renders the organization recursively in a hierarchial manner.
+- Dynamic Onboarding: Vendors can create sub-vendors under them.
 
-1. Authentication & Security
+#### 3. Delegation System
+- Granular Control: Super Vendors can toggle permissions dynamically.
+- Inheritance: Sub-vendors operate within the constraints set by their parent. 
 
-JWT Implementation: Secure session management.
+#### 4. Fleet & Document Management
+- Duplicate Prevention: Prevents onboarding vehicles/drivers that already exist under same or different vendor.
+- Onboarding:  Vendors can onboard new drivers/vehicles under them and assigns vehicles to drivers.
 
-Role-Based Access Control (RBAC): Middleware (verifyToken, isSuperVendor) strictly guards routes.
+---
 
-Password Hashing: Bcrypt utilized for security.
+### 💻 Installation & Setup
 
-2. Multi-Level Vendor Hierarchy
+#### **Prerequisites**
+- Node.js (v14+)  
+- PostgreSQL connection string (NeonDB recommended)  
 
-Visual Tree: Frontend renders the organization recursively in a hierarchial manner.
+---
 
-Dynamic Onboarding: Vendors can create sub-vendors under them.
+### **1. Backend Setup**
 
-3. Delegation System
-
-Granular Control: Super Vendors can toggle permissions dynamically.
-
-Inheritance: Sub-vendors operate within the constraints set by their parent.
-
-4. Fleet & Document Management
-
-Duplicate Prevention: Prevents onboarding vehicles/drivers that already exist under same or different vendor.
-
-Onboarding:  Vendors can onboard new drivers/vehicles under them and assigns vehicles to drivers.
-
-💻 Installation & Setup
-
-Prerequisites
-
-Node.js (v14+)
-
-PostgreSQL Connection String (Neon DB recommended)
-
-1. Backend Setup
-
+```bash
 # Clone the repository
-git clone [https://github.com/yourusername/megacabs.git](https://github.com/yourusername/megacabs.git)
+git clone https://github.com/yourusername/megacabs.git
 cd megacabs/backend
 
 # Install dependencies
 npm install
 
-# Setup Environment Variables (.env)
+# Setup Environment Variables
 echo "DATABASE_URL='your_neon_db_string'" > .env
 echo "JWT_SECRET='your_secret_key'" >> .env
-echo "PORT='your port number'">> .env
-# Push Schema to DB
+
+# Push Prisma Schema
 npx prisma db push
 
 # Start Server
 npm start
+```
 
+### 2. Frontend Setup
 
-2. Frontend Setup
-
+```bash
 cd ../frontend
 
 # Install dependencies
 npm install
 
-# Start React Dev Server
+# Start React development server
 npm start
+```
 
+### 📊 API Documentation (Key Endpoints)
 
-📊 API Documentation (Key Endpoints)
+| Method | Endpoint                   | Description                   | Access            |
+|--------|----------------------------|-------------------------------|-------------------|
+| POST   | /api/auth/login           | Login user & issue JWT       | Public            |
+| POST   | /api/auth/register-super  | Setup root admin             | Public (One-time) |
+| GET    | /api/vendors/hierarchy    | Fetch recursive Org Tree     | Authenticated     |
+| POST   | /api/vendors/create-sub   | Create child vendor          | Parent Vendor     |
+| PATCH  | /api/vendors/delegate     | Grant permissions            | Super Vendor      |
+| POST   | /api/fleet/onboard-driver | Onboard driver               | Authorized Vendor |
+| POST   | /api/fleet/add-vehicle    | Add vehicle to fleet         | Authorized Vendor |
+| GET    |/api/fleet//vehicles       | Get Details of Vehicles      | Authorized Vendor |
+---
 
-Method
+### 📈 Cost Estimation (Time & Space Complexity)
 
-Endpoint
+#### Hierarchy Retrieval
+- **Naive:** `O(N^2)` (multiple queries per level)  
+- **Optimized:** Single recursive DB query → Highly efficient  
 
-Description
+#### Space Complexity
+- Enums reduce repeated string storage  
+- Optional audit logs stored separately to prevent database bloat  
 
-Access
+---
 
-POST
+### 🔮 Future Improvements
 
-/api/auth/login
+- Caching: Cache the Hierarchy Tree to reduce DB load on frequent dashboard refreshes.
+- Microservices: Split Auth and Fleet management into separate services for horizontal scaling.
 
-Login user & return JWT
-
-Public
-
-POST
-
-/api/auth/register-super
-
-Setup the root admin
-
-Public (One-time)
-
-GET
-
-/api/vendor/hierarchies
-
-Fetch full recursive Org Tree
-
-Authenticated
-
-POST
-
-/api/vendor/create-sub
-
-Create a child vendor
-
-Parent Vendor
-
-PATCH
-
-/api/vendor/delegate
-
-Grant permissions
-
-Super Vendor
-
-POST
-
-/api/fleet/onboard-driver
-
-Add driver to system
-
-Authorized Vendor
-
-POST
-
-/api/fleet/add-vehicle
-
-Add vehicle to fleet
-
-Authorized Vendor
-
-GET
-
-/api/fleet//vehicles
-
-Get Details of Vehicles
-
-Authorized Vendor
-
-📈 Cost Estimation (Time & Space Complexity)
-
-Hierarchy Retrieval:
-
-Naive Approach: Fetch Level 1 -> Loop -> Fetch Level 2. Time: $O(N^2)$.
-
-Our Approach: Single Deep Query using Prisma include recursion. Time: Optimized to Database IO speeds.
-
-Space Complexity:
-
-Use of Enums (UserRole) in Postgres reduces storage footprint compared to string repetition.
-
-🔮 Future Improvements
-
-Caching: Cache the Hierarchy Tree to reduce DB load on frequent dashboard refreshes.
-
-Microservices: Split Auth and Fleet management into separate services for horizontal scaling.
