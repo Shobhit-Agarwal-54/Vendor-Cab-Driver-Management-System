@@ -45,6 +45,7 @@ fleetRouter.post('/onboard-driver', verifyToken, async (req, res) => {
     }
     res.status(201).json({ message: "Driver Onboarded", driver: driverUser });
   } catch (error) {
+    console.log('Onboard Driver Error:', error);
     res.status(500).json({ error: error.message });
   }
 });

@@ -101,4 +101,44 @@ VendorRouter.patch('/delegate', [verifyToken, isSuperVendor], async (req, res) =
   }
 });
 
+
+// Helper to generate nested includes dynamically
+// This solves the "N-Level" fetching problem elegantly
+const getRecursiveInclude = (depth) => {
+  if (depth === 0) {
+    // Base case: Just fetch the user email, stop fetching children
+    return {
+      user: { select: { email: true } },
+      children: true // Fetches basic child info but no deeper relations
+    };
+  }
+
+  return {
+    user: { select: { email: true } },
+    children: {
+      include: getRecursiveInclude(depth - 1) // Recursion happens here
+    }
+  };
+};
+// GET /api/vendors/hierarchy
+VendorRouter.get('/hierarchies', verifyToken, async (req, res) => {
+  try {
+    const currentVendor = await prisma.vendor.findUnique({ where: { userId: req.userId } });
+    
+    if (!currentVendor) {
+      return res.status(404).json({ message: "Vendor profile not found" });
+    }
+
+    // Use the helper to fetch 10 levels deep (covers almost any org chart)
+    const hierarchy = await prisma.vendor.findUnique({
+      where: { id: currentVendor.id },
+      include: getRecursiveInclude(10) 
+    });
+
+    res.json(hierarchy);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 export default VendorRouter;

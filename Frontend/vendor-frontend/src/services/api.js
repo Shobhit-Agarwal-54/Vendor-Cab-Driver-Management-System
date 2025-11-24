@@ -30,7 +30,7 @@ const api = {
 
   // Vendor Hierarchy Routes
   getHierarchy: async () => {
-    const res = await fetch(`${API_BASE}/vendors/hierarchy`, {
+    const res = await fetch(`${API_BASE}/vendor/hierarchies`, {
       headers: api.getHeaders()
     });
     return res.json();
@@ -47,7 +47,7 @@ const api = {
   },
 
   delegate: async (data) => {
-    const res = await fetch(`${API_BASE}/vendors/delegate`, {
+    const res = await fetch(`${API_BASE}/vendor/delegate`, {
       method: 'PATCH',
       headers: api.getHeaders(),
       body: JSON.stringify(data)

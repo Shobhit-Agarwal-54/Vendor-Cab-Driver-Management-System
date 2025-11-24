@@ -1,3 +1,6 @@
+import React, { useState } from 'react';
+import api from '../../services/api.js';
+
 const RegisterSuper = ({ onSwitchToLogin }) => {
   const [formData, setFormData] = useState({ email: '', password: '', region: '' });
   const [message, setMessage] = useState('');
@@ -29,9 +32,19 @@ const RegisterSuper = ({ onSwitchToLogin }) => {
           <input type="email" placeholder="Admin Email" className="w-full px-4 py-2 rounded-lg border focus:ring-2 focus:ring-green-500 outline-none" onChange={e => setFormData({...formData, email: e.target.value})} required />
           <input type="password" placeholder="Password" className="w-full px-4 py-2 rounded-lg border focus:ring-2 focus:ring-green-500 outline-none" onChange={e => setFormData({...formData, password: e.target.value})} required />
           <input type="text" placeholder="Region (e.g. Headquarters)" className="w-full px-4 py-2 rounded-lg border focus:ring-2 focus:ring-green-500 outline-none" onChange={e => setFormData({...formData, region: e.target.value})} required />
-          <button type="submit" className="w-full py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 font-semibold shadow-md">Create Root Admin</button>
+          <button type="submit" 
+              className="w-full md:w-auto px-6 py-2 rounded-lg bg-gradient-to-r from-blue-500 to-indigo-600 
+             text-white font-semibold shadow-md 
+             hover:opacity-70 hover:shadow-lg 
+             transition-all duration-300 mb-4"
+          >Create Root Admin</button>
         </form>
-        <button onClick={onSwitchToLogin} className="mt-4 w-full text-sm text-gray-500 hover:text-gray-800">Back to Login</button>
+        <button onClick={onSwitchToLogin}
+              className="w-full md:w-auto px-6 py-2 rounded-lg bg-gradient-to-r from-blue-500 to-indigo-600 
+             text-white font-semibold shadow-md 
+             hover:opacity-70 hover:shadow-lg 
+             transition-all duration-300"
+         >Back to Login</button>
       </div>
     </div>
     );
