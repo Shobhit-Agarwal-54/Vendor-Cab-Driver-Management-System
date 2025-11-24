@@ -47,32 +47,6 @@ VendorRouter.post('/create-subvendor', verifyToken, async (req, res) => {
   }
 });
 
-// GET /api/vendors/hierarchy
-// "System Monitoring": Super Vendor sees everyone, Sub Vendor sees only their tree
-VendorRouter.get('/hierarchy', verifyToken, async (req, res) => {
-  try {
-    const currentVendor = await prisma.vendor.findUnique({ where: { userId: req.userId } });
-    
-    // Recursive query to get children and grandchildren
-    const hierarchy = await prisma.vendor.findUnique({
-      where: { id: currentVendor.id },
-      include: {
-        user: { select: { email: true } },
-        children: {
-          include: {
-            user: { select: { email: true } },
-            children: true // Fetch deeper levels
-          }
-        }
-      }
-    });
-
-    res.json(hierarchy);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
-
 // PATCH /api/vendors/delegate
 // "Delegation": Only Super Vendor can run this
 VendorRouter.patch('/delegate', [verifyToken, isSuperVendor], async (req, res) => {
@@ -120,7 +94,8 @@ const getRecursiveInclude = (depth) => {
     }
   };
 };
-// GET /api/vendors/hierarchy
+// GET /api/vendors/hierarchies
+// "System Monitoring": Super Vendor sees everyone, Sub Vendor sees only their tree
 VendorRouter.get('/hierarchies', verifyToken, async (req, res) => {
   try {
     const currentVendor = await prisma.vendor.findUnique({ where: { userId: req.userId } });

@@ -68,14 +68,22 @@ const Login = ({ onLogin, onSwitchToRegister }) => {
           <button 
             type="submit" 
             disabled={loading}
-            className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-black rounded-lg font-semibold shadow-md hover:shadow-lg transition-all disabled:opacity-70 disabled:cursor-not-allowed"
+             className="w-full md:w-auto px-6 py-2 rounded-lg bg-gradient-to-r from-blue-500 to-indigo-600 
+             text-white font-semibold shadow-md 
+             hover:opacity-70 hover:shadow-lg 
+             transition-all duration-300"
           >
             {loading ? 'Authenticating...' : 'Sign In'}
           </button>
         </form>
 
         <div className="mt-6 text-center pt-4 border-t border-gray-100">
-          <button onClick={onSwitchToRegister} className="text-sm text-blue-600 hover:text-blue-800 font-medium">
+          <button onClick={onSwitchToRegister}
+             className="w-full md:w-auto px-6 py-2 rounded-lg bg-gradient-to-r from-blue-500 to-indigo-600 
+             text-white font-semibold shadow-md 
+             hover:opacity-70 hover:shadow-lg 
+             transition-all duration-300"
+           >
             Setup System (Super Vendor Registration)
           </button>
         </div>
