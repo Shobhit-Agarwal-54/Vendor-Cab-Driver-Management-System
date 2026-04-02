@@ -18,7 +18,8 @@ app.use(morgan('combined'));
 app.get('/', (req, res) => {
   res.json({ 
     status: 'Active', 
-    message: 'Vendor Management System API is running' 
+    message: 'Vendor Management System API is running',
+    status:"You can send more requests"
   });
 });
 

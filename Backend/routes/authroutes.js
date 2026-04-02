@@ -57,7 +57,10 @@ authRouter.post('/login', async (req, res) => {
     if (!passwordIsValid) {
       return res.status(401).json({ accessToken: null, message: "Invalid Password!" });
     }
-
+    if(user.enabled==false)
+    {
+      return res.status(401).json({message:"Login Access Not granted. Use OTP verification first"});
+    }
     const token = jwt.sign({ id: user.id, role: user.role }, SECRET_KEY, {
       expiresIn: 86400 // 24 hours
     });

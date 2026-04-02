@@ -11,7 +11,7 @@ export const VendorRouter = express.Router();
 // This route works for both Super Vendors and Sub Vendors
 VendorRouter.post('/create-subvendor', verifyToken, async (req, res) => {
   try {
-    const { email, password, region } = req.body;
+    const { email, password, region,enabled } = req.body;
     
     // 1. Get current user's vendor profile
     const currentUser = await prisma.vendor.findUnique({ where: { userId: req.userId } });
@@ -19,7 +19,6 @@ VendorRouter.post('/create-subvendor', verifyToken, async (req, res) => {
     if (!currentUser) return res.status(400).json({ message: "Only Vendors can add sub-vendors" });
 
     const hashedPassword = await bcrypt.hash(password, 8);
-
     // 2. Create (User + Vendor Profile) with Parent Link
     const newSubVendor = await prisma.user.create({
       data: {
